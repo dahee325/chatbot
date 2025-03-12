@@ -7,12 +7,14 @@ from dotenv import load_dotenv
 from typing import Union
 from fastapi import FastAPI, Request
 
-from utils import kospi
+from utils import kospi, openai, langchain
 
 app = FastAPI()
 
 load_dotenv()
 TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 URL = f'http://api.telegram.org/bot{TOKEN}'
 
 @app.post("/") # post : 데이터를 줄테니까 처리해줘
@@ -31,10 +33,10 @@ async def read_root(request: Request): # async : 비동기적 함수
             output = kospi()
         else:
             output = 'X'
+    # chatGPT 기반 챗봇
     else:
-        output = '지원하지 않는 기능입니다.'
-
-
+        # output = openai(OPENAI_API_KEY, text)
+        output = langchain(text)
     requests.get(f'{URL}/sendMessage?chat_id={user_id}&text={output}') # 사용자가 한 말 앵무새처럼 똑같이 응답
 
     return body
